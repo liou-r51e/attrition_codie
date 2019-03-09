@@ -16,7 +16,7 @@ from sklearn.metrics import (brier_score_loss, precision_score, recall_score,
 import copy
 
 
-# In[7]:
+# In[35]:
 
 
 #Data defination
@@ -25,14 +25,14 @@ attrition.head()
 
 def intify(s):
     u = np.unique(s)
-    i = np.arange(len(u))
+    i = np.arange(len(u))+1
     return s.map(dict(zip(u, i)))
-attrition
 
 
-# In[14]:
+# In[150]:
 
 
+num_timestamps = 3
 a = attrition.columns.values
 #c = attrition.dtypes
 for col_name in a:
@@ -44,11 +44,12 @@ for col_name in a:
 #attrition.Department
 #not numpy.issubdtype(attrition['Age'].dtype,numpy.number)
 attrition.to_csv('new_converted_data.csv')
-attritions = np.array_split(attrition,3)
-attritions[1]
+attritions = np.array_split(attrition,num_timestamps)
+for i in range(num_timestamps-1,-1,-1):
+    attritions[i].index = range(0,1470)
 
 
-# In[143]:
+# In[40]:
 
 
 df = copy.deepcopy(attrition)
@@ -57,7 +58,7 @@ del df['EmployeeNumber']
 df['attrition'] = attrition.Attrition
 
 
-# In[144]:
+# In[41]:
 
 
 df['is_train'] = np.random.uniform(0, 1, len(df)) <= .75
@@ -70,14 +71,13 @@ print('Number of observations in the training data:', len(train))
 print('Number of observations in the test data:',len(test))
 
 
-# In[159]:
+# In[43]:
 
 
 features = df.columns[:33]
-features
 
 
-# In[161]:
+# In[44]:
 
 
 x_train = train
@@ -89,7 +89,7 @@ x_test = test
 y_test = test['attrition']
 
 
-# In[173]:
+# In[45]:
 
 
 # Create a random forest Classifier
@@ -106,7 +106,7 @@ clf.predict_proba(test[features])[0:10]
 preds = clf.predict(test[features])
 
 
-# In[174]:
+# In[48]:
 
 
 # Create confusion matrix, WHICH REALLY IS CONFUSING AT FIRST
@@ -123,25 +123,26 @@ print(score)
 print(score_count)
 
 
-# In[187]:
+# In[49]:
 
 
 f1_score(y_test, preds, average='binary')
 
 
-# In[186]:
+# In[50]:
 
 
-precision_recall_curve(y_test,preds,pos_label=1)
+precision_recall_curve(y_test,preds)
 
 
-# In[178]:
+# In[51]:
 
 
 recall_score(y_test,preds)
+#y_test
 
 
-# In[167]:
+# In[52]:
 
 
 # Scatter plot
@@ -169,5 +170,34 @@ plt.show()
 # In[ ]:
 
 
-f1_score(y_true, y_pred, average=None)
+
+
+
+# In[152]:
+
+
+for i in range(num_timestamps-1,-1,-1):
+    divide = attritions[i].div(attritions[0],axis=1)
+    a = (divide.replace([-np.inf,np.inf,np.nan],0)+attritions[i].mul(((divide==np.inf)|(divide==-np.inf) | np.isnan(divide))*1))
+    a.EmployeeNumber =  attritions[i].EmployeeNumber
+    a.Attrition = attritions[i].Attrition
+    attritions[i] = a
+
+
+# In[155]:
+
+
+attritions[2].head()
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
 
