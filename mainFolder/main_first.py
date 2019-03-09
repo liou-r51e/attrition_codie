@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[112]:
+# In[2]:
 
 
 import pandas as pd
@@ -11,29 +11,32 @@ from sklearn.metrics import accuracy_score
 import plotly.offline as py
 py.init_notebook_mode(connected=True)
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import (brier_score_loss, precision_score, recall_score,
+                             f1_score,precision_recall_curve)
 import copy
 
 
-# In[113]:
+# In[7]:
 
 
 #Data defination
-attrition = pd.read_csv('employee_data.csv')
+attrition = pd.read_csv('3_sheets.csv')
 attrition.head()
 
 def intify(s):
     u = np.unique(s)
     i = np.arange(len(u))
     return s.map(dict(zip(u, i)))
+attrition
 
 
-# In[141]:
+# In[14]:
 
 
 a = attrition.columns.values
 #c = attrition.dtypes
 for col_name in a:
-    if not numpy.issubdtype(attrition[col_name].dtype,numpy.number):
+    if not np.issubdtype(attrition[col_name].dtype,np.number):
         attrition[[col_name]] = intify(attrition.get(col_name))
 
 #pd.DataFrame(data=attrition, columns = [a[0]]).Age.dtype
@@ -41,6 +44,8 @@ for col_name in a:
 #attrition.Department
 #not numpy.issubdtype(attrition['Age'].dtype,numpy.number)
 attrition.to_csv('new_converted_data.csv')
+attritions = np.array_split(attrition,3)
+attritions[1]
 
 
 # In[143]:
@@ -84,7 +89,7 @@ x_test = test
 y_test = test['attrition']
 
 
-# In[162]:
+# In[173]:
 
 
 # Create a random forest Classifier
@@ -101,7 +106,7 @@ clf.predict_proba(test[features])[0:10]
 preds = clf.predict(test[features])
 
 
-# In[165]:
+# In[174]:
 
 
 # Create confusion matrix, WHICH REALLY IS CONFUSING AT FIRST
@@ -116,6 +121,24 @@ score = accuracy_score(y_test, preds)
 score_count = accuracy_score(y_test, preds, normalize=False)
 print(score)
 print(score_count)
+
+
+# In[187]:
+
+
+f1_score(y_test, preds, average='binary')
+
+
+# In[186]:
+
+
+precision_recall_curve(y_test,preds,pos_label=1)
+
+
+# In[178]:
+
+
+recall_score(y_test,preds)
 
 
 # In[167]:
@@ -146,5 +169,5 @@ plt.show()
 # In[ ]:
 
 
-
+f1_score(y_true, y_pred, average=None)
 
